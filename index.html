@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thu tiền tháng 11 - Lớp 6A</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f9; text-align: center; padding: 20px; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h2 { color: #d32f2f; }
+        .input-group { margin: 15px 0; text-align: left; position: relative; }
+        label { font-weight: bold; display: block; margin-bottom: 5px; }
+        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+        input:focus { outline: none; border-color: #d32f2f; }
+        .suggestions {
+            position: absolute; top: 100%; left: 0; right: 0;
+            background: white; border: 1px solid #ccc; border-top: none;
+            border-radius: 0 0 8px 8px; max-height: 200px; overflow-y: auto;
+            z-index: 1000; display: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .suggestions div {
+            padding: 10px; cursor: pointer; text-align: left;
+            font-size: 15px; border-bottom: 1px solid #f0f0f0;
+        }
+        .suggestions div:hover { background-color: #ffe5e5; color: #d32f2f; }
+        .notice-box {
+            background: #fff8e1; border-left: 5px solid #ff9800;
+            border-radius: 8px; padding: 15px 18px; margin: 15px 0;
+            text-align: left; font-size: 15px; line-height: 1.7; color: #333;
+        }
+        .notice-box .notice-title { font-size: 16px; font-weight: bold; color: #e65100; margin-bottom: 8px; text-transform: uppercase; }
+        .notice-box ul { margin: 8px 0; padding-left: 20px; }
+        .notice-box .total-line { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ffb300; font-size: 17px; font-weight: bold; color: #d32f2f; }
+        .notice-box .deadline { display: inline-block; margin-top: 8px; background: #ffebee; color: #c62828; padding: 4px 10px; border-radius: 6px; font-size: 14px; font-weight: bold; }
+        .qr-box { margin-top: 20px; padding: 15px; border: 2px dashed #d32f2f; border-radius: 10px; }
+        .qr-box img { max-width: 100%; height: auto; border-radius: 8px; }
+        .btn { background: #d32f2f; color: white; padding: 12px 20px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; width: 100%; margin-top: 15px; }
+        .btn:disabled { background: #999; cursor: not-allowed; }
+        .btn-download { background: #2e7d32; }
+        .info { background: #fff3f3; padding: 10px; border-radius: 8px; margin-top: 15px; font-size: 14px; color: #333; text-align: left; }
+        .highlight { color: #d32f2f; font-weight: bold; }
+        .success-msg { color: green; font-weight: bold; margin-top: 10px; display: none; padding: 10px; background: #e8f5e9; border-radius: 8px; }
+        .guide-box { display: none; background: #fff8e1; border: 2px solid #ffb300; border-radius: 8px; padding: 15px; margin-top: 15px; text-align: left; font-size: 15px; line-height: 1.6; }
+        .guide-box h4 { margin: 0 0 10px 0; color: #e65100; }
+        .guide-box b { color: #d32f2f; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>THU CÁC KHOẢN THÁNG 11</h2>
+    <p>GVCN: Hoàng Anh Dũng</p>
+
+    <div class="input-group">
+        <label>Họ và tên học sinh:</label>
+        <input type="text" id="studentName" placeholder="Gõ tên để tìm..." autocomplete="off" oninput="filterSuggestions()" onfocus="filterSuggestions()">
+        <div class="suggestions" id="suggestionsBox"></div>
+    </div>
+
+    <div class="notice-box">
+        <div class="notice-title">📢 Thông báo nộp tiền tháng 11</div>
+        <div>Kính gửi Quý phụ huynh học sinh lớp 6A, nhà trường thông báo các khoản thu tháng 11 như sau:</div>
+        <ul>
+            <li><b>Bảo hiểm y tế (BHYT):</b> 685.000đ</li>
+            <li><b>Kế hoạch nhỏ (KHN):</b> 20.000đ</li>
+        </ul>
+        <div class="total-line">💰 Tổng cộng: 705.000đ</div>
+        <div class="deadline">⏰ Hạn nộp: trước ngày 30/11</div>
+    </div>
+
+    <div class="qr-box" id="qrBox">
+        <p>Vui lòng nhập tên học sinh để xem mã QR thanh toán</p>
+    </div>
+
+    <button class="btn btn-download" id="btnDownload" onclick="confirmAndSubmit()" style="display:none;">✅ GỬI THÔNG TIN VỀ GVCN</button>
+    <div class="success-msg" id="successMsg">✅ Đã ghi nhận thông tin nộp tiền của học sinh!</div>
+
+    <div class="guide-box" id="guideBox">
+        <h4>📸 CÁCH LƯU MÃ QR VÀO ĐIỆN THOẠI:</h4>
+        <b>Bước 1:</b> Nhấn và <b>giữ ngón tay</b> vào ảnh mã QR phía trên khoảng 2 giây.<br>
+        <b>Bước 2:</b> Một menu hiện ra, chọn <b>"Lưu ảnh"</b> (hoặc "Tải hình ảnh", "Save image").<br>
+        <b>Bước 3:</b> Mở App ngân hàng (MB Bank, ViettelMoney...) → chọn <b>"Quét QR"</b> → chọn ảnh vừa lưu trong thư viện.
+    </div>
+
+    <div class="info">
+        <b>Số tài khoản:</b> 9704 2292 0513 1639 674<br>
+        <b>Ngân hàng:</b> MB Bank<br>
+        <b>Nội dung CK:</b> <span id="contentCK" class="highlight">Tên học sinh - Lớp 6A</span>
+    </div>
+</div>
+
+<script>
+    // ✅ ĐÃ CẬP NHẬT LINK WEB APP CỦA BẠN
+    const API_URL = "https://script.google.com/macros/s/AKfycbxAvKDRG7bx6q6doDLSNY15GC1bTZiDBrafOjkfFDE7TGqrVKa_UkrqqRh74Ro_MkD0Qw/exec";
+
+    const studentList = [
+        "Trần Mai Anh","Đặng Phương Chi","Trần Nguyên Chi","Bùi Quỳnh Chi","Nguyễn Thị Chi",
+        "Trần Hồng Cẩm","Ngô Mạnh Cường","Nguyễn Thành Đạt","Bùi Hiền Dịu","Nguyễn Thùy Dung",
+        "Trần Đức Duy","Bùi Gia Thịnh","Nguyễn Trung Hiếu","Bùi Đức Hiếu","Bùi Minh Hòa",
+        "Nguyễn Thái Hòa","Lê Huy Hoàng","Nguyễn Ngọc Hùng","Bùi Đức Khánh","Nguyễn Hoàng Ngọc Khánh",
+        "Hoàng Khánh Long","Bùi Khánh Ly","Hà Trần Minh","Đỗ Anh Minh","Trần Đức Nam",
+        "Nguyễn Hoàng Hải Nam","Bùi Trung Nghĩa","Nguyễn Thị Bảo Ngọc","Bùi Ngọc Nhi","Bùi Mai Dy Niên",
+        "Trần Minh Phương","Trần Đại Quang","Nguyễn Thị Lệ Quyên","Trần Diễm Quỳnh","Bùi Nguyễn Tuệ Sam",
+        "Lê Tiến Tài","Nguyễn Trung Thành","Trần Đức Thắng","Bùi Đức Tiến","Ngô Xuân Tùng"
+    ];
+
+    const TOTAL_AMOUNT = 705000;
+    const FEE_LABEL = "BHYT (685.000đ) + KHN (20.000đ)";
+
+    let currentName = "";
+    let currentQRUrl = "";
+    let isSubmitted = false;
+
+    function removeDiacritics(str) {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D");
+    }
+
+    function filterSuggestions() {
+        if (isSubmitted) return;
+        const input = document.getElementById('studentName').value.trim();
+        const suggestionsBox = document.getElementById('suggestionsBox');
+        if (input === "") { suggestionsBox.style.display = "none"; return; }
+
+        const normalizedInput = removeDiacritics(input.toLowerCase());
+        const matches = studentList.filter(name => removeDiacritics(name.toLowerCase()).includes(normalizedInput));
+
+        if (matches.length === 0) { suggestionsBox.style.display = "none"; return; }
+
+        suggestionsBox.innerHTML = matches.map(name => `<div onclick="selectStudent('${name}')">${name}</div>`).join('');
+        suggestionsBox.style.display = "block";
+    }
+
+    function selectStudent(name) {
+        if (isSubmitted) return;
+        document.getElementById('studentName').value = name;
+        document.getElementById('suggestionsBox').style.display = "none";
+        updateQR();
+    }
+
+    document.addEventListener('click', function(e) {
+        const suggestionsBox = document.getElementById('suggestionsBox');
+        const input = document.getElementById('studentName');
+        if (e.target !== input && e.target !== suggestionsBox) suggestionsBox.style.display = "none";
+    });
+
+    function updateQR() {
+        if (isSubmitted) return;
+        const name = document.getElementById('studentName').value.trim();
+        const qrBox = document.getElementById('qrBox');
+        const contentSpan = document.getElementById('contentCK');
+        const btnDownload = document.getElementById('btnDownload');
+        const guideBox = document.getElementById('guideBox');
+
+        btnDownload.style.display = "none";
+        guideBox.style.display = "none";
+
+        if (!studentList.includes(name)) {
+            qrBox.innerHTML = "<p>Vui lòng chọn tên học sinh từ danh sách gợi ý</p>";
+            contentSpan.innerText = "Tên học sinh - Lớp 6A";
+            currentQRUrl = "";
+            return;
+        }
+
+        currentName = name;
+        const content = encodeURIComponent(name + " - Lop 6A");
+        contentSpan.innerText = decodeURIComponent(content);
+
+        const bankId = "MB";
+        const accountNo = "9704229205131639674";
+        currentQRUrl = `https://img.vietqr.io/image/${bankId}-${accountNo}-compact2.png?amount=${TOTAL_AMOUNT}&addInfo=${content}&accountName=HOANG%20ANH%20DUNG`;
+
+        qrBox.innerHTML = `<img src="${currentQRUrl}" alt="Mã QR thanh toán 705.000đ" id="qrImage">`;
+        btnDownload.style.display = "block";
+    }
+
+    function confirmAndSubmit() {
+        if (isSubmitted) return;
+        if (!currentQRUrl) { alert("Vui lòng chọn tên học sinh trước!"); return; }
+
+        const xacNhan = confirm(`Xác nhận gửi thông tin nộp tiền:\n\n👤 Học sinh: ${currentName}\n💵 Khoản nộp: ${FEE_LABEL}\n💰 Tổng tiền: ${TOTAL_AMOUNT.toLocaleString('vi-VN')}đ\n\nSau khi xác nhận, thông tin sẽ được gửi về GVCN và KHÔNG THỂ sửa lại. Bạn có chắc chắn không?`);
+        if (!xacNhan) return;
+
+        const btn = document.getElementById('btnDownload');
+        btn.disabled = true;
+        btn.innerText = "ĐANG GỬI THÔNG TIN...";
+
+        fetch(API_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                hoTen: currentName,
+                soTien: TOTAL_AMOUNT,
+                khoanThu: FEE_LABEL
+            })
+        })
+        .then(() => {
+            isSubmitted = true;
+            btn.disabled = true;
+            btn.innerText = "✅ ĐÃ GỬI THÔNG TIN THÀNH CÔNG";
+            btn.style.background = "#999";
+            btn.style.cursor = "not-allowed";
+            document.getElementById('studentName').disabled = true;
+            document.getElementById('successMsg').style.display = "block";
+            document.getElementById('guideBox').style.display = "block";
+            document.getElementById('guideBox').scrollIntoView({ behavior: 'smooth' });
+        })
+        .catch(error => {
+            console.error('Lỗi:', error);
+            alert("Có lỗi khi gửi dữ liệu. Vui lòng kiểm tra kết nối mạng và thử lại!");
+            btn.disabled = false;
+            btn.innerText = "✅ GỬI THÔNG TIN VỀ GVCN";
+        });
+    }
+</script>
+</body>
+</html>
